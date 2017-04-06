@@ -1,3 +1,5 @@
+package com.parser;
+
 public class InputStream {
     private String input;
     private int index;

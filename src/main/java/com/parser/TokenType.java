@@ -1,3 +1,5 @@
+package com.parser;
+
 public enum TokenType {
     NUMBER,
     STRING,

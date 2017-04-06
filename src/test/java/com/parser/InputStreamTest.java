@@ -1,3 +1,6 @@
+package com.parser;
+
+import com.parser.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
