@@ -9,6 +9,14 @@ public class Token {
         this.object = object;
     }
 
+    public TokenType getTokenType() {
+        return tokenType;
+    }
+
+    public Object getObject() {
+        return object;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
