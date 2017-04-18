@@ -6,5 +6,15 @@ public enum TokenType {
     PUNCTUATION,
     KEY_WORD,
     VAR,
-    OPERATION
+    OPERATION,
+    ASSIGN,
+    BINARY,
+    PLUS,
+    MINUS,
+    TIMES,
+    DIVIDE,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    COMMA,
+    ID
 }

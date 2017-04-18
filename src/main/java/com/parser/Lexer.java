@@ -1,19 +1,37 @@
 package com.parser;
 
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class Lexer {
     private final static Pattern ID_PATTERN = Pattern.compile("[a-zλ_]");
-    private final static List KEY_WORDS = Arrays.asList("if", "else", "lambda", "then");
+    private final static List KEY_WORDS = Arrays.asList("if", "else", "lambda", "then", "max");
+    private final static Map<String, TokenType> TOKEN_TYPE_MAP = new HashMap<String, TokenType>() {
+        {
+            put("+", TokenType.PLUS);
+            put("-", TokenType.MINUS);
+            put("*", TokenType.TIMES);
+            put("/", TokenType.DIVIDE);
+            put("(", TokenType.LEFT_PAREN);
+            put(")", TokenType.RIGHT_PAREN);
+            put(",", TokenType.COMMA);
+        }
+    };
     private InputStream inputStream;
     private Token current;
 
-    public Lexer(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public Lexer(String source) {
+        this.inputStream = new InputStream(source);
+    }
+
+    public List<Token> run() {
+        List<Token> result = new ArrayList<>();
+        while (!eof()) {
+            result.add(next());
+        }
+        return result;
     }
 
     static Token number(Integer num) {
@@ -25,7 +43,7 @@ public class Lexer {
     }
 
     static Token punctuation(String p) {
-        return new Token(TokenType.PUNCTUATION, p);
+        return new Token(TOKEN_TYPE_MAP.get(p), p);
     }
 
     static Token keyWord(String kw) {
@@ -37,7 +55,7 @@ public class Lexer {
     }
 
     static Token operator(String operator) {
-        return new Token(TokenType.OPERATION, operator);
+        return new Token(TOKEN_TYPE_MAP.get(operator), operator);
     }
 
     boolean isWhiteSpace(char c) {

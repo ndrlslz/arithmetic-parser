@@ -1,15 +1,29 @@
 package com.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Parser {
     private Lexer lexer;
+    private Map<String, Integer> PRECEDENCE = new HashMap<>();
 
     public Parser(Lexer lexer) {
         this.lexer = lexer;
+        PRECEDENCE.put("=", 1);
+        PRECEDENCE.put("||", 2);
+        PRECEDENCE.put("&&", 3);
+        PRECEDENCE.put("<", 7);
+        PRECEDENCE.put(">", 7);
+        PRECEDENCE.put("<=", 7);
+        PRECEDENCE.put("+", 10);
+        PRECEDENCE.put("-", 10);
+        PRECEDENCE.put("*", 20);
+        PRECEDENCE.put("/", 20);
+        PRECEDENCE.put("%", 20);
     }
 
     static LambdaNode lambdaNode(List vars, Node body) {
@@ -31,6 +45,11 @@ public class Parser {
         return current.getTokenType().equals(TokenType.PUNCTUATION) && input.equals(current.getObject());
     }
 
+    private boolean isOp() {
+        Token current = lexer.peek();
+        return current.getTokenType().equals(TokenType.OPERATION);
+    }
+
     private Token skipPunc(String punc) {
         Token current = lexer.peek();
         if (punc.equals(current.getObject())) {
@@ -50,7 +69,6 @@ public class Parser {
             }
         }
 
-
         return new ProgNode();
     }
 
@@ -63,8 +81,29 @@ public class Parser {
         return null;
     }
 
-    public Node parseExpression() {
-        return null;
+    public Object parseExpression() {
+        return maybe_call(() -> maybe_binary(parseAtom(), 0));
+    }
+
+    public ProgNode parseTopLevel() {
+        ProgNode progNode = new ProgNode();
+        while (!lexer.eof()) {
+            progNode.addNode((Node) parseExpression());
+            if (!lexer.eof()) skipPunc(";");
+        }
+        return progNode;
+    }
+
+    public ProgNode parseProg() {
+        List<Object> progs = delimited("{", "}", ";", (ParserToken) parseExpression());
+        ProgNode progNode = new ProgNode();
+        progs.forEach(new Consumer<Object>() {
+            @Override
+            public void accept(Object o) {
+                progNode.addNode((Node) o);
+            }
+        });
+        return progNode;
     }
 
     public ParserToken parseVarname() {
@@ -81,7 +120,7 @@ public class Parser {
 //        readUntil(token -> token.getObject().equals("("));
 //        List<Token> args = readUntil(token -> token.getObject().equals(")"), ",");
         List<Object> args = delimited("(", ")", ",", parseVarname());
-        Node body = parseExpression();
+        Node body = null;
         System.out.println(args);
         return new LambdaNode(args, body);
     }
@@ -104,6 +143,50 @@ public class Parser {
         }
         skipPunc(stop);
         return result;
+    }
+
+
+    private Object maybe_call(ParserToken expression) {
+        Object expr = expression.parse();
+        return isPunc("(") ? parseCall(expr) : expr;
+    }
+
+    private Object maybe_binary(Object left, int myPrec) {
+        Token current = lexer.peek();
+        if (isOp()) {
+            int hisPrec = PRECEDENCE.get(current.getObject().toString());
+            if (hisPrec > myPrec) {
+                lexer.next();
+                if (current.getObject().toString().equals("=")) {
+                    AssignNode assignNode = new AssignNode(left, maybe_binary(parseAtom(), hisPrec));
+                    return maybe_binary(assignNode, myPrec);
+                }
+            }
+        }
+        return left;
+    }
+    private Object parseAtom() {
+        if (isPunc("(")) {
+            lexer.next();
+            Object exp = parseExpression();
+            skipPunc(")");
+            return exp;
+        }
+        if (isLambda()) {
+            lexer.next();
+            return parseLambda();
+        }
+        Token token = lexer.next();
+        if (token.getTokenType().equals(TokenType.VAR)
+                || token.getTokenType().equals(TokenType.NUMBER)
+                || token.getTokenType().equals(TokenType.STRING)) {
+            return token;
+        }
+        throw new RuntimeException("unexpected!");
+    }
+
+    private CallNode parseCall(Object func) {
+        return new CallNode((Node) func, delimited("(", ")", ",", (ParserToken) parseExpression()));
     }
 
     public List<Token> readUntil(Predicate<Token> predicate) {

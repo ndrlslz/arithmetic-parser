@@ -6,4 +6,11 @@ public class NumberNode extends Node {
     public NumberNode() {
         super(NodeType.NUM);
     }
+
+    @Override
+    public String toString() {
+        return "NumberNode{" +
+                "number=" + number +
+                '}';
+    }
 }

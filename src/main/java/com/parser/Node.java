@@ -6,4 +6,12 @@ public abstract class Node {
     public Node(NodeType nodeType) {
         this.nodeType = nodeType;
     }
+
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "nodeType=" + nodeType +
+                '}';
+    }
 }
