@@ -1,215 +1,98 @@
 package com.parser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class Parser {
-    private Lexer lexer;
-    private Map<String, Integer> PRECEDENCE = new HashMap<>();
+    private List<Token> tokens;
+    private int index;
+    private int length;
 
     public Parser(Lexer lexer) {
-        this.lexer = lexer;
-        PRECEDENCE.put("=", 1);
-        PRECEDENCE.put("||", 2);
-        PRECEDENCE.put("&&", 3);
-        PRECEDENCE.put("<", 7);
-        PRECEDENCE.put(">", 7);
-        PRECEDENCE.put("<=", 7);
-        PRECEDENCE.put("+", 10);
-        PRECEDENCE.put("-", 10);
-        PRECEDENCE.put("*", 20);
-        PRECEDENCE.put("/", 20);
-        PRECEDENCE.put("%", 20);
+        tokens = lexer.run();
+        this.index = 0;
+        this.length = tokens.size();
     }
 
-    static LambdaNode lambdaNode(List vars, Node body) {
-        return new LambdaNode(vars, body);
-    }
-
-    private boolean isLambda(Token token) {
-        return token.getTokenType().equals(TokenType.KEY_WORD)
-                && "lambda".equals(token.getObject());
-    }
-
-    private boolean isLambda() {
-        Token current = lexer.peek();
-        return current.getTokenType().equals(TokenType.KEY_WORD) && "lambda".equals(current.getObject());
-    }
-
-    private boolean isPunc(String input) {
-        Token current = lexer.peek();
-        return current.getTokenType().equals(TokenType.PUNCTUATION) && input.equals(current.getObject());
-    }
-
-    private boolean isOp() {
-        Token current = lexer.peek();
-        return current.getTokenType().equals(TokenType.OPERATION);
-    }
-
-    private Token skipPunc(String punc) {
-        Token current = lexer.peek();
-        if (punc.equals(current.getObject())) {
-            return lexer.next();
+    private Node factor() {
+        if (receive(TokenType.LEFT_PAREN)) {
+            Node expression = expression();
+            expect(TokenType.RIGHT_PAREN);
+            return expression;
+        } else {
+            return number();
         }
-        throw new RuntimeException("unexpected token, expecting " + punc);
     }
 
-
-    public ProgNode parse() {
-        ProgNode progNode = new ProgNode();
-
-        while (!lexer.eof()) {
-            Token current = lexer.peek();
-            if (isLambda(current)) {
-                progNode.addNode(parseLambda());
-            }
-        }
-
-        return new ProgNode();
-    }
-
-
-    public Node parseNode() {
-        Token current = lexer.next();
-        if (isLambda(current)) return parseLambda();
-
-
-        return null;
-    }
-
-    public Object parseExpression() {
-        return maybe_call(() -> maybe_binary(parseAtom(), 0));
-    }
-
-    public ProgNode parseTopLevel() {
-        ProgNode progNode = new ProgNode();
-        while (!lexer.eof()) {
-            progNode.addNode((Node) parseExpression());
-            if (!lexer.eof()) skipPunc(";");
-        }
-        return progNode;
-    }
-
-    public ProgNode parseProg() {
-        List<Object> progs = delimited("{", "}", ";", (ParserToken) parseExpression());
-        ProgNode progNode = new ProgNode();
-        progs.forEach(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) {
-                progNode.addNode((Node) o);
-            }
-        });
-        return progNode;
-    }
-
-    public ParserToken parseVarname() {
-        return () -> {
-            Token token = lexer.next();
-            if (TokenType.VAR.equals(token.getTokenType())) {
-                return token.getObject().toString();
-            }
-            throw new RuntimeException("Expecting variable name");
-        };
-    }
-
-    public LambdaNode parseLambda() {
-//        readUntil(token -> token.getObject().equals("("));
-//        List<Token> args = readUntil(token -> token.getObject().equals(")"), ",");
-        List<Object> args = delimited("(", ")", ",", parseVarname());
-        Node body = null;
-        System.out.println(args);
-        return new LambdaNode(args, body);
-    }
-
-    private List<Object> delimited(String start, String stop, String separator, ParserToken parser) {
-        List<Object> result = new ArrayList<>();
-        boolean first = true;
-
-        skipPunc(start);
-        while (!lexer.eof()) {
-            if (isPunc(stop)) break;
-            if (first) {
-                first = false;
-            } else {
-                skipPunc(separator);
-            }
-            if (isPunc(stop)) break;
-//            result.add(lexer.next());
-            result.add(parser.parse());
-        }
-        skipPunc(stop);
-        return result;
-    }
-
-
-    private Object maybe_call(ParserToken expression) {
-        Object expr = expression.parse();
-        return isPunc("(") ? parseCall(expr) : expr;
-    }
-
-    private Object maybe_binary(Object left, int myPrec) {
-        Token current = lexer.peek();
-        if (isOp()) {
-            int hisPrec = PRECEDENCE.get(current.getObject().toString());
-            if (hisPrec > myPrec) {
-                lexer.next();
-                if (current.getObject().toString().equals("=")) {
-                    AssignNode assignNode = new AssignNode(left, maybe_binary(parseAtom(), hisPrec));
-                    return maybe_binary(assignNode, myPrec);
-                }
-            }
+    private Node term() {
+        Node left = factor();
+        if (isTimesOrDivide()) {
+            char op = operator();
+            Node right = term();
+            return expression(left, right, op);
         }
         return left;
     }
-    private Object parseAtom() {
-        if (isPunc("(")) {
-            lexer.next();
-            Object exp = parseExpression();
-            skipPunc(")");
-            return exp;
+
+    Node expression() {
+        Node left = term();
+
+        if (isPlusOrMinus()) {
+            char op = operator();
+            Node right = expression();
+            return expression(left, right, op);
         }
-        if (isLambda()) {
-            lexer.next();
-            return parseLambda();
-        }
-        Token token = lexer.next();
-        if (token.getTokenType().equals(TokenType.VAR)
-                || token.getTokenType().equals(TokenType.NUMBER)
-                || token.getTokenType().equals(TokenType.STRING)) {
-            return token;
-        }
-        throw new RuntimeException("unexpected!");
+        return left;
     }
 
-    private CallNode parseCall(Object func) {
-        return new CallNode((Node) func, delimited("(", ")", ",", (ParserToken) parseExpression()));
+    private boolean isPlusOrMinus() {
+        return !eof() &&
+                (current().getTokenType().equals(TokenType.PLUS) || current().getTokenType().equals(TokenType.MINUS));
     }
 
-    public List<Token> readUntil(Predicate<Token> predicate) {
-        List<Token> result = new ArrayList<>();
-        while (!lexer.eof() && !predicate.test(lexer.peek())) {
-            result.add(lexer.next());
-        }
-        lexer.next();
-        return result;
+    private boolean isTimesOrDivide() {
+        return !eof() &&
+                (current().getTokenType().equals(TokenType.TIMES) || current().getTokenType().equals(TokenType.DIVIDE));
     }
 
-    public List<Token> readUntil(Predicate<Token> predicate, String separator) {
-        List<Token> result = new ArrayList<>();
-        while (!lexer.eof() && !predicate.test(lexer.peek())) {
-            if (lexer.peek().getObject().equals(separator)) {
-                lexer.next();
-            } else {
-                result.add(lexer.next());
-            }
+    private char operator() {
+        return next().getObject().toString().charAt(0);
+    }
 
+    private Node number() {
+        return new NumberNode((Integer) next().getObject());
+    }
+
+    private Node expression(Node left, Node right, char op) {
+        return new ExpressionNode(left, right, op);
+    }
+
+    private void expect(TokenType tokenType) {
+        if (!receive(tokenType)) {
+            throw new RuntimeException("unexpected token type");
         }
-        lexer.next();
-        return result;
+    }
+
+    private boolean receive(TokenType tokenType) {
+        if (!eof() && current().getTokenType().equals(tokenType)) {
+            next();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean eof() {
+        return index >= length;
+    }
+
+    private Token current() {
+        if (!eof()) return tokens.get(index);
+        throw new RuntimeException("out of tokens index.");
+    }
+
+    private Token next() {
+        Token current = current();
+        index++;
+        return current;
     }
 
 }

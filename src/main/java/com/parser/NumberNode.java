@@ -1,10 +1,31 @@
 package com.parser;
 
-public class NumberNode extends Node {
-    private Integer number;
+public class NumberNode implements Node {
+    private int number;
 
-    public NumberNode() {
-        super(NodeType.NUM);
+    public NumberNode(int number) {
+        this.number = number;
+    }
+
+    @Override
+    public <T> T accept(Visitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NumberNode that = (NumberNode) o;
+
+        return number == that.number;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return number;
     }
 
     @Override

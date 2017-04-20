@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
 
 public class Lexer {
     private final static Pattern ID_PATTERN = Pattern.compile("[a-zλ_]");
-    private final static List KEY_WORDS = Arrays.asList("if", "else", "lambda", "then", "max");
+    private final static List KEY_WORDS = Arrays.asList("if", "else", "lambda", "then");
+    private final static List FUNS = Arrays.asList("max", "min");
     private final static Map<String, TokenType> TOKEN_TYPE_MAP = new HashMap<String, TokenType>() {
         {
             put("+", TokenType.PLUS);
@@ -58,6 +59,10 @@ public class Lexer {
         return new Token(TOKEN_TYPE_MAP.get(operator), operator);
     }
 
+    static Token func(String func) {
+        return new Token(TokenType.ID, func);
+    }
+
     boolean isWhiteSpace(char c) {
         return " \t\n".indexOf(c) >= 0;
     }
@@ -84,6 +89,10 @@ public class Lexer {
 
     boolean isKeyWord(String s) {
         return KEY_WORDS.contains(s);
+    }
+
+    boolean isFunc(String s) {
+        return FUNS.contains(s);
     }
 
     private String readWhile(Predicate<Character> predicate) {
@@ -130,7 +139,7 @@ public class Lexer {
         return sb.toString();
     }
 
-    Token readNext() {
+    private Token readNext() {
         readWhile(this::isWhiteSpace);
         if (inputStream.eof()) return null;
         char current = inputStream.peek();
@@ -142,6 +151,8 @@ public class Lexer {
             String s = readWhile(this::isId);
             if (isKeyWord(s)) {
                 return keyWord(s);
+            } else if (isFunc(s)) {
+                return func(s);
             } else {
                 return var(s);
             }
