@@ -1,5 +1,6 @@
 package com.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
@@ -13,11 +14,17 @@ public class Parser {
         this.length = tokens.size();
     }
 
+    public Node run() {
+        return expression();
+    }
     private Node factor() {
         if (receive(TokenType.LEFT_PAREN)) {
             Node expression = expression();
             expect(TokenType.RIGHT_PAREN);
             return expression;
+        } else if (receive(TokenType.ID)) {
+            prev();
+            return fun();
         } else {
             return number();
         }
@@ -58,6 +65,18 @@ public class Parser {
         return next().getObject().toString().charAt(0);
     }
 
+    private Node fun() {
+        String funcName = next().getObject().toString();
+        expect(TokenType.LEFT_PAREN);
+        List<Node> args = new ArrayList<>();
+        while (!receive(TokenType.RIGHT_PAREN)) {
+            if (!receive(TokenType.COMMA)) {
+                args.add(expression());
+            }
+        }
+        return new FuncNode(funcName, args);
+    }
+
     private Node number() {
         return new NumberNode((Integer) next().getObject());
     }
@@ -95,4 +114,9 @@ public class Parser {
         return current;
     }
 
+    private Token prev() {
+        Token current = current();
+        index--;
+        return current;
+    }
 }

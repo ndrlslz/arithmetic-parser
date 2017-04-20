@@ -3,6 +3,7 @@ package com.parser;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
@@ -13,13 +14,58 @@ public class ParserTest {
 
     @Before
     public void setUp() throws Exception {
-        parser = new Parser(new Lexer("(1 + 2) * 3"));
+        parser = new Parser(new Lexer("(1 + 2) * 3 + max(1, 2) + 1"));
     }
 
     @Test
     public void parse() throws Exception {
-        Node node = parser.expression();
-        System.out.println(node);
+        Node node = new Parser(new Lexer("1 + 2 + 3 * 4 + 5 / 6")).run();
+
+
+        assertEquals(node, expression(
+                number(1),
+                '+',
+                expression(
+                        number(2),
+                        '+',
+                        expression(
+                                expression(
+                                        number(3),
+                                        '*',
+                                        number(4)),
+                                '+',
+                                expression(
+                                        number(5),
+                                        '/',
+                                        number(6))))));
+
+    }
+
+    @Test
+    public void parseParen() throws Exception {
+
+        Node node = new Parser(new Lexer("(1+2)*3")).run();
+
+        assertEquals(node, expression(
+                expression(
+                        number(1),
+                        '+',
+                        number(2)
+                ),
+                '*',
+                number(3)));
+    }
+
+    private Node number(int num) {
+        return new NumberNode(num);
+    }
+
+    private Node fun(String name, List<Node> args) {
+        return new FuncNode(name, args);
+    }
+
+    private Node expression(Node left, char op, Node right) {
+        return new ExpressionNode(left, right, op);
     }
 
 
@@ -44,20 +90,5 @@ public class ParserTest {
 //        assertEquals(parser.current(), symbol("+"));
 //    }
 
-    private Token number(int num) {
-        return new Token(TokenType.NUMBER, num);
-    }
 
-    public Token symbol(String input) {
-        switch (input) {
-            case "+": return new Token(TokenType.PLUS, input);
-            case "-": return new Token(TokenType.MINUS, input);
-            case "*": return new Token(TokenType.TIMES, input);
-            case "/": return new Token(TokenType.DIVIDE, input);
-            case "(": return new Token(TokenType.LEFT_PAREN, input);
-            case ")": return new Token(TokenType.RIGHT_PAREN, input);
-            default:
-                throw new RuntimeException("unexpected!");
-        }
-    }
 }
