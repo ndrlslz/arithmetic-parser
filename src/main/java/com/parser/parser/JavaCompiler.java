@@ -3,9 +3,9 @@ package com.parser.parser;
 import com.parser.ast.ExpressionNode;
 import com.parser.ast.Node;
 import com.parser.ast.NumberNode;
-import jdk.internal.org.objectweb.asm.ClassWriter;
-import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.Opcodes;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.io.IOException;
 
