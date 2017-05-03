@@ -10,31 +10,25 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 public class JavaCompilerTest {
-    private JavaCompiler javaCompiler;
-
-    @Before
-    public void setUp() throws Exception {
-        javaCompiler = new JavaCompiler("CalculatorTool");
-        }
-
-
     @Test
     public void testCalculator() throws Exception {
-        String className = "CalculatorTool";
-        byte[] data = javaCompiler.generate("(1 + 2) * 3 + 4 / 2");
-        generateClassFile(className, data);
-        Calculator calculator = generateClass(className, data);
+        Calculator calculator = generateClass("CalculatorTool", "(1 + 2) * 3 + 4 / 2");
         assertEquals(11, calculator.calc());
     }
 
-    private static Calculator generateClass(String className, byte[] data) throws IllegalAccessException, InstantiationException {
+    private static Calculator generateClass(String className, String source) throws IllegalAccessException, InstantiationException, IOException {
+        JavaCompiler javaCompiler = new JavaCompiler(className);
+        byte[] data = javaCompiler.generate(source);
+        generateClassFile(className, data);
         Class clazz = new TestClassLoader().defineClass(className, data);
         return (Calculator) clazz.newInstance();
 
     }
 
     private static void generateClassFile(String className, byte[] data) throws IOException, IllegalAccessException, InstantiationException {
-        File file = new File("gen/" + className + ".class");
+        File dir = new File("generatedClass/");
+        dir.mkdir();
+        File file = new File(dir.getName() + "/" + className + ".class");
         FileOutputStream fout = new FileOutputStream(file);
         fout.write(data);
         fout.close();
