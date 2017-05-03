@@ -4,7 +4,7 @@ public class Token {
     private TokenType tokenType;
     private Object object;
 
-    public Token(TokenType tokenType, Object object) {
+    Token(TokenType tokenType, Object object) {
         this.tokenType = tokenType;
         this.object = object;
     }

@@ -5,22 +5,14 @@ import com.parser.ast.FuncNode;
 import com.parser.ast.Node;
 import com.parser.ast.NumberNode;
 import com.parser.lexer.Lexer;
-import com.parser.parser.Parser;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ParserTest {
-    private Parser parser;
-
-    @Before
-    public void setUp() throws Exception {
-        parser = new Parser(new Lexer("(1 + 2) * 3 + max(1, 2) + 1"));
-    }
-
     @Test
     public void parse() throws Exception {
         Node node = new Parser(new Lexer("1 + 2 + 3 * 4 + 5 / 6")).run();

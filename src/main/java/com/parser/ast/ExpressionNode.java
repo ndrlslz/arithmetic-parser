@@ -13,6 +13,7 @@ public class ExpressionNode implements Node {
         this.operator = operator;
     }
 
+
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);

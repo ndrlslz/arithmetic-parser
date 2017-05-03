@@ -7,24 +7,21 @@ public class InputStream {
     private int col;
     private int length;
 
-    public int getIndex() {
-        return index;
-    }
 
-    public InputStream(String input) {
+    InputStream(String input) {
         this.input = input;
         this.length = input.length();
     }
 
-    public char peek() {
+    char peek() {
         return input.charAt(index);
     }
 
-    public boolean eof() {
+    boolean eof() {
         return index == length;
     }
 
-    public char next() {
+    char next() {
         char c = input.charAt(index++);
         if ('\n' == c) {
             line++;

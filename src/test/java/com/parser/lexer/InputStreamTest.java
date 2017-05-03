@@ -1,12 +1,12 @@
 package com.parser.lexer;
 
-import com.parser.lexer.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class InputStreamTest {
     private InputStream inputStream;

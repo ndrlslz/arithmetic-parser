@@ -11,24 +11,25 @@ import com.parser.lexer.TokenType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser {
+class Parser {
     private List<Token> tokens;
     private int index;
     private int length;
 
-    public Parser(Lexer lexer) {
+    Parser(Lexer lexer) {
         tokens = lexer.run();
         this.index = 0;
         this.length = tokens.size();
     }
 
-    public Parser(String source) {
+    Parser(String source) {
         this(new Lexer(source));
     }
 
-    public Node run() {
+    Node run() {
         return expression();
     }
+
     private Node factor() {
         if (receive(TokenType.LEFT_PAREN)) {
             Node expression = expression();
@@ -52,7 +53,7 @@ public class Parser {
         return left;
     }
 
-    Node expression() {
+    private Node expression() {
         Node left = term();
 
         if (isPlusOrMinus()) {

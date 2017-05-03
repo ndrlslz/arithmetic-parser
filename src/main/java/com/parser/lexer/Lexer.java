@@ -1,10 +1,6 @@
 package com.parser.lexer;
 
 
-import com.parser.lexer.InputStream;
-import com.parser.lexer.Token;
-import com.parser.lexer.TokenType;
-
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -39,11 +35,11 @@ public class Lexer {
         return result;
     }
 
-    static Token number(Integer num) {
+    private static Token number(Integer num) {
         return new Token(TokenType.NUMBER, num);
     }
 
-    static Token string(String s) {
+    private static Token string(String s) {
         return new Token(TokenType.STRING, s);
     }
 
@@ -63,7 +59,7 @@ public class Lexer {
         return new Token(TOKEN_TYPE_MAP.get(operator), operator);
     }
 
-    static Token func(String func) {
+    private static Token func(String func) {
         return new Token(TokenType.ID, func);
     }
 
@@ -95,7 +91,7 @@ public class Lexer {
         return KEY_WORDS.contains(s);
     }
 
-    boolean isFunc(String s) {
+    private boolean isFunc(String s) {
         return FUNS.contains(s);
     }
 
@@ -107,7 +103,7 @@ public class Lexer {
         return sb.toString();
     }
 
-    Token readNumber() {
+    private Token readNumber() {
         return number(Integer.valueOf(readWhile(this::isNum)));
     }
 
@@ -168,7 +164,7 @@ public class Lexer {
         return c == '"';
     }
 
-    public Token peek() {
+    private Token peek() {
         if (current == null) {
             current = readNext();
         }
@@ -184,7 +180,7 @@ public class Lexer {
         return tok;
     }
 
-    public boolean eof() {
+    private boolean eof() {
         return peek() == null;
     }
 

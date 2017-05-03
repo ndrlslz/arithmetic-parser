@@ -1,8 +1,5 @@
 package com.parser.lexer;
 
-import com.parser.lexer.Lexer;
-import com.parser.lexer.Token;
-import com.parser.lexer.TokenType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,11 +79,11 @@ public class LexerTest {
         assertEquals(punctuation("{"), lexer.next());
     }
 
-    public Token number(int input) {
+    private Token number(int input) {
         return new Token(TokenType.NUMBER, input);
     }
 
-    public Token symbol(String input) {
+    private Token symbol(String input) {
         switch (input) {
             case "+": return new Token(TokenType.PLUS, input);
             case "-": return new Token(TokenType.MINUS, input);
