@@ -1,4 +1,4 @@
-package com.parser;
+package com.parser.lexer;
 
 public class InputStream {
     private String input;

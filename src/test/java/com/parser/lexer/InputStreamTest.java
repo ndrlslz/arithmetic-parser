@@ -1,6 +1,6 @@
-package com.parser;
+package com.parser.lexer;
 
-import com.parser.InputStream;
+import com.parser.lexer.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 

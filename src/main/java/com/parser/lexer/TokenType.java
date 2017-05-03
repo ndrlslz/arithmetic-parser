@@ -1,4 +1,4 @@
-package com.parser;
+package com.parser.lexer;
 
 public enum TokenType {
     NUMBER,

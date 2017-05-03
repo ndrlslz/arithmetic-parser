@@ -1,13 +1,15 @@
-package com.parser;
+package com.parser.lexer;
 
+import com.parser.lexer.Lexer;
+import com.parser.lexer.Token;
+import com.parser.lexer.TokenType;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.parser.Lexer.*;
+import static com.parser.lexer.Lexer.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

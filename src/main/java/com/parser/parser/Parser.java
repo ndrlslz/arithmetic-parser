@@ -1,4 +1,12 @@
-package com.parser;
+package com.parser.parser;
+
+import com.parser.ast.ExpressionNode;
+import com.parser.ast.FuncNode;
+import com.parser.ast.Node;
+import com.parser.ast.NumberNode;
+import com.parser.lexer.Lexer;
+import com.parser.lexer.Token;
+import com.parser.lexer.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +20,10 @@ public class Parser {
         tokens = lexer.run();
         this.index = 0;
         this.length = tokens.size();
+    }
+
+    public Parser(String source) {
+        this(new Lexer(source));
     }
 
     public Node run() {

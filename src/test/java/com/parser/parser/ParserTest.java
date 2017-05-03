@@ -1,11 +1,15 @@
-package com.parser;
+package com.parser.parser;
 
+import com.parser.ast.ExpressionNode;
+import com.parser.ast.FuncNode;
+import com.parser.ast.Node;
+import com.parser.ast.NumberNode;
+import com.parser.lexer.Lexer;
+import com.parser.parser.Parser;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 

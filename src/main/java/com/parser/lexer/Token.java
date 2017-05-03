@@ -1,4 +1,4 @@
-package com.parser;
+package com.parser.lexer;
 
 public class Token {
     private TokenType tokenType;

@@ -1,4 +1,4 @@
-package com.parser;
+package com.parser.ast;
 
 public enum NodeType {
     NUM,

@@ -1,5 +1,9 @@
-package com.parser;
+package com.parser.lexer;
 
+
+import com.parser.lexer.InputStream;
+import com.parser.lexer.Token;
+import com.parser.lexer.TokenType;
 
 import java.util.*;
 import java.util.function.Predicate;

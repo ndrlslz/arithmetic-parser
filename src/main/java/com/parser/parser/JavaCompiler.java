@@ -1,24 +1,25 @@
-package com.parser;
+package com.parser.parser;
 
+import com.parser.ast.ExpressionNode;
+import com.parser.ast.Node;
+import com.parser.ast.NumberNode;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class JavaCompiler implements Visitor{
+class JavaCompiler implements Visitor {
     private ClassWriter classWriter;
     private MethodVisitor methodVisitor;
 
-    public JavaCompiler() {
+    JavaCompiler(String className) {
         this.classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 
         classWriter.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC,
-                "CalculatorTool", null, "java/lang/Object", new String[]{"com/parser/Calculator"});
+                className, null, "java/lang/Object", new String[]{"com/parser/parser/Calculator"});
 
         MethodVisitor mv = classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitVarInsn(ALOAD, 0);
@@ -30,42 +31,20 @@ public class JavaCompiler implements Visitor{
         mv.visitMaxs(1, 1);
         mv.visitEnd();
 
-
         methodVisitor = classWriter.visitMethod(Opcodes.ACC_PUBLIC, "calc", "()I", null, null);
-        new Parser(new Lexer("(1 + 2)*3")).run().accept(this);
 
+    }
+
+    byte[] generate(String source) throws IOException, IllegalAccessException, InstantiationException {
+        new Parser(source).run().accept(this);
 
         methodVisitor.visitInsn(IRETURN);
         methodVisitor.visitMaxs(0, 0);
         methodVisitor.visitEnd();
 
         classWriter.visitEnd();
-    }
 
-
-    public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException {
-        JavaCompiler javaCompiler = new JavaCompiler();
-
-        javaCompiler.generate("CalculatorTool");
-
-    }
-
-    private class TestClassLoader extends ClassLoader {
-        Class defineClass(String name, byte[] value) {
-            return defineClass(name, value, 0, value.length);
-        }
-    }
-
-    public void generate(String className) throws IOException, IllegalAccessException, InstantiationException {
-        byte[] data = classWriter.toByteArray();
-        File file = new File("gen/" + className + ".class");
-        FileOutputStream fout = new FileOutputStream(file);
-        fout.write(data);
-        fout.close();
-
-        Class c = new TestClassLoader().defineClass(className, data);
-        Calculator calculator = (Calculator) c.newInstance();
-        System.out.println(calculator.calc());
+        return classWriter.toByteArray();
     }
 
     @Override

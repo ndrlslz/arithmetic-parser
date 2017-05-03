@@ -1,4 +1,6 @@
-package com.parser;
+package com.parser.ast;
+
+import com.parser.parser.Visitor;
 
 public class NumberNode implements Node {
     private int number;
