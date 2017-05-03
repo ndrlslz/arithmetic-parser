@@ -6,3 +6,4 @@ gradle/
 out/
 build/
 generatedClass/
+.idea/
