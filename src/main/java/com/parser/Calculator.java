@@ -1,4 +1,5 @@
 package com.parser;
 
-public class Calculator {
+public interface Calculator {
+    int calc();
 }

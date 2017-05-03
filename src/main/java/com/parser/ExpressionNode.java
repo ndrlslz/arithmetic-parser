@@ -1,9 +1,9 @@
 package com.parser;
 
 public class ExpressionNode implements Node {
-    private Node left;
-    private Node right;
-    private char operator;
+    public Node left;
+    public Node right;
+    public char operator;
 
     public ExpressionNode(Node left, Node right, char operator) {
         this.left = left;

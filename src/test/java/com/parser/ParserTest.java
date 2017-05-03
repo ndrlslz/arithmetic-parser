@@ -20,7 +20,7 @@ public class ParserTest {
     @Test
     public void parse() throws Exception {
         Node node = new Parser(new Lexer("1 + 2 + 3 * 4 + 5 / 6")).run();
-
+        System.out.println(node);
 
         assertEquals(node, expression(
                 number(1),
